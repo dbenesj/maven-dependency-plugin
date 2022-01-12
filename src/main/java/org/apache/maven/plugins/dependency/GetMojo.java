@@ -231,8 +231,14 @@ public class GetMojo
                 }
                 catch ( DependencyResolverException e )
                 {
+                    if ( coordinate == null || coordinate.getClassifier() == null
+                          || coordinate.getClassifier().trim().length() == 0 )
+                    {
+                        getLog().info( "Classfier has not been provided, so not retrying without it." );
+                        throw e;
+                    }
                     coordinate.setClassifier( "" );
-                    getLog().info( "Artifact with the classifier not found, trying one more time without classifier: "
+                    getLog().warn( "Artifact with the classifier not found, trying one more time without classifier: "
                         + coordinate + " with transitive dependencies" );
                     dependencyResolver.resolveDependencies( buildingRequest, coordinate, null );
                 }
@@ -240,13 +246,20 @@ public class GetMojo
             else
             {
                 getLog().info( "Resolving " + coordinate );
-                try {
+                try
+                {
                     artifactResolver.resolveArtifact( buildingRequest, toArtifactCoordinate( coordinate ) );
                 }
                 catch ( ArtifactResolverException e )
                 {
+                    if ( coordinate == null || coordinate.getClassifier() == null
+                          || coordinate.getClassifier().trim().length() == 0 )
+                    {
+                        getLog().info( "Classfier has not been provided, so not retrying without it." );
+                        throw e;
+                    }
                     coordinate.setClassifier( "" );
-                    getLog().info( "Artifact with the classifier not found, trying one more time without classifier: "
+                    getLog().warn( "Artifact with the classifier not found, trying one more time without classifier: "
                         + coordinate  );
                     artifactResolver.resolveArtifact( buildingRequest, toArtifactCoordinate( coordinate ) );
                 }
