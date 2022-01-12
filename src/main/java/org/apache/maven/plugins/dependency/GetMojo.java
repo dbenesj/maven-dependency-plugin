@@ -225,12 +225,31 @@ public class GetMojo
             if ( transitive )
             {
                 getLog().info( "Resolving " + coordinate + " with transitive dependencies" );
-                dependencyResolver.resolveDependencies( buildingRequest, coordinate, null );
+                try
+                {
+                    dependencyResolver.resolveDependencies( buildingRequest, coordinate, null );
+                }
+                catch ( DependencyResolverException e )
+                {
+                    coordinate.setClassifier( "" );
+                    getLog().info( "Artifact with the classifier not found, trying one more time without classifier: "
+                        + coordinate + " with transitive dependencies" );
+                    dependencyResolver.resolveDependencies( buildingRequest, coordinate, null );
+                }
             }
             else
             {
                 getLog().info( "Resolving " + coordinate );
-                artifactResolver.resolveArtifact( buildingRequest, toArtifactCoordinate( coordinate ) );
+                try {
+                    artifactResolver.resolveArtifact( buildingRequest, toArtifactCoordinate( coordinate ) );
+                }
+                catch ( ArtifactResolverException e )
+                {
+                    coordinate.setClassifier( "" );
+                    getLog().info( "Artifact with the classifier not found, trying one more time without classifier: "
+                        + coordinate  );
+                    artifactResolver.resolveArtifact( buildingRequest, toArtifactCoordinate( coordinate ) );
+                }
             }
         }
         catch ( ArtifactResolverException | DependencyResolverException e )
